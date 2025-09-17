@@ -1,6 +1,7 @@
 ---
 title: "Crime Rates"
 ---
+Benjamin Messinger -- Crime Rates
 
 Follow along with the demo to learn how to calculate crime rates using R and the Tidyverse. We'll also introduce a new library, janitor, which helps make column names easier to work with. You should get started by loading the tidyverse in a new R block, then install and load janitor.
 
@@ -23,7 +24,7 @@ crimes <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads
 
 ### Task 3: Use janitor to clean up the column names
 
-
+Was told to ignore
 
 ### Task 4: Calculate the total crime rate for each year (picking our unit!)
 
@@ -45,7 +46,7 @@ crimes_with_rates <- crimes |> mutate(violent_rate = violent_crime_total/populat
 
 Write a few sentences about what you found in the data. What years had the highest crime rates? What years had the lowest crime rates? Does the pattern match your expectations?
 
-
+Total crime increased steadily from 1975 and peaked in 1980 and then again in 1995. After 1995 the crime rate decreased steadily afterwards. Yet, 1980 had the highest property rate and 1992 had the highest violent rate. The property rate increased and peaked in the 1980's decreased in the following years but then increased to the second-highest peak in 1995 and then decreased afterwards. The most recent data, 2020 was the lowest rate in total, property and violent crime rate probably because of covid. The lowest crime rate makes a lot of sense because people refused to leave their houses that year, but it was decreasing before that. I would've expected the 90's to have higher crime than the 80's and I was wrong with that, despite the fact that it was close. So yes, in a way this pattern does match my expectations, but not fully.
 
 
 When you are done, save your work, switch to GitHub Desktop, then add, commit and push your changes to GitHub and submit the URL of the notebook in ELMS.
