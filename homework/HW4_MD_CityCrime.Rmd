@@ -1,6 +1,7 @@
 ---
 title: "HW4 MD CityCrime"
 ---
+Benjamin Messinger
 
 In this assignment, we will be working with a dataset of total crimes reported by Maryland cities for two consecutive years. You'll load the data, calculate the violent and property crime rates for each city for both years, and then calculate the percentage change in the crime rates between the two years. You'll also write a short story based on your findings.
 
@@ -9,6 +10,11 @@ In this assignment, we will be working with a dataset of total crimes reported b
 You will need to load the tidyverse library and the janitor library
 
 ```{r}
+install.packages("tidyverse")
+install.packages("janitor")
+library(tidyverse)
+library(janitor)
+
 ```
 
 Then you'll load the data from the web. The URL for the data is: https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_cities_crime_2019_2020.csv. You will create a dataframe called `md_cities` that contains the data from this URL.
@@ -16,20 +22,27 @@ Then you'll load the data from the web. The URL for the data is: https://raw.git
 ### Task 2: Load the Data
 
 ```{r}
+md_cities <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_cities_crime_2019_2020.csv")
 ```
 ### Task 3: Calculating Rates
 
 Calculate violent and property crime rates for each city for both years using `mutate()`. You'll create four new columns: `violent_rate_2019`, `property_rate_2019`, `violent_rate_2020`, and `property_rate_2020`. You'll need to figure out the proper unit rate, given that there are varying populations. There's no perfect choice; choose the one that works best for you. Save the results to a new dataframe called `md_cities_rates`.
 
 ```{r}
+md_cities_rates <- md_cities |>
+  mutate(
+violent_rate_2019 = (violent_crime_2019 / population_2019) * 100000,
+property_rate_2019 = (property_crime_2019 / population_2019) * 100000,
+violent_rate_2020 = (violent_crime_2020 / population_2020) * 100000,
+property_rate_2020 = (property_crime_2020 / population_2020) * 100000
+)
 ```
 
 ### Task 4: Describe the Rates
 
 Examine the new dataframe, `md_cities_rates`, by clicking on it in the Environment tab in RStudio and sorting by the rate columns. Write a couple of sentences about the results, comparing and contrasting the cities with the highest rates (both violent and property) in 2019 and 2020. Do you see any patterns? What does this tell you about crime in Maryland cities? What's the story here?
 
-ANSWER HERE
-
+The highest amount of crime in Maryland cities occurred in Baltimore through violent and property crimes in both years. But, Baltimore didn't have the highest rate of crime because of it's large population. I definitely see the pattern that crime was less in 2020 in both violent and property crimes than in 2019. The existence of Covid in 2020, may have something to do with that. The story to me is how covid decreased the crime rate in Baltimore during 2020.
 
 ### Task 5: Calculate Percentage Change
 
