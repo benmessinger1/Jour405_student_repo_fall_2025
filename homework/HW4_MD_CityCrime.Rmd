@@ -81,3 +81,18 @@ Save this notebook, then commit it to your local repository. Push the changes to
 
 Hi, so my computer broke and I’m currently using a Chromebook that I’m not able to download R on, so I had to use AI in some of the code for this. I tried my best to use R on the computers at Knight Hall, and some of it worked, but it took a long time and wasn't loading properly. I apologize for the inconvenience. I did my best with the cards I’ve been dealt to complete this assignment, and I was able to review the data tables and calculate what was needed. 
 
+## Task 10: Using the 2020 violent crime rate, calculate the percentiles using `ntile()`. Save the results to a new dataframe called `md_cities_percentiles`. How many cities are above the 90th percentile? Calculate the Interquartile Range of the 2020 violent crime rate using `summarize()` and R's `IQR()` function. 
+The syntax is similar to how `mean()` works.
+
+```{r}
+md_cities_percentiles <- md_cities_rates |> 
+mutate(percentile = ntile(violent_rate_2020, 100))
+md_cities_IQR <- md_cities_rates |> 
+summarize(IQR = IQR(violent_rate_2020))
+```
+
+
+
+Do the results change your best story idea from the previous assignment? Why or why not?
+
+No, my results changed because I saw that the crime in 2020 was skewed to the right and it made it clear that certain cities had their crime affected by the added data, but my story didn't change. There is still a lot of outliers in the data and crime was still decreased in 2020. Considering that the IQR that I calculated was only 2020, the change from 2019 to 2020 didn't change, therefore the story idea I had in the previous homework assignment still works as Baltimore still saw the highest crime rate and all of the elements I used in my lede and a few graphs still stand true after the added information. 
