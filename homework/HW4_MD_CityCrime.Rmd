@@ -1,6 +1,7 @@
 ---
 title: "HW4 MD CityCrime"
 ---
+Benjamin Messinger
 
 In this assignment, we will be working with a dataset of total crimes reported by Maryland cities for two consecutive years. You'll load the data, calculate the violent and property crime rates for each city for both years, and then calculate the percentage change in the crime rates between the two years. You'll also write a short story based on your findings.
 
@@ -9,6 +10,11 @@ In this assignment, we will be working with a dataset of total crimes reported b
 You will need to load the tidyverse library and the janitor library
 
 ```{r}
+install.packages("tidyverse")
+install.packages("janitor")
+library(tidyverse)
+library(janitor)
+
 ```
 
 Then you'll load the data from the web. The URL for the data is: https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_cities_crime_2019_2020.csv. You will create a dataframe called `md_cities` that contains the data from this URL.
@@ -16,40 +22,77 @@ Then you'll load the data from the web. The URL for the data is: https://raw.git
 ### Task 2: Load the Data
 
 ```{r}
+md_cities <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_cities_crime_2019_2020.csv")
 ```
 ### Task 3: Calculating Rates
 
 Calculate violent and property crime rates for each city for both years using `mutate()`. You'll create four new columns: `violent_rate_2019`, `property_rate_2019`, `violent_rate_2020`, and `property_rate_2020`. You'll need to figure out the proper unit rate, given that there are varying populations. There's no perfect choice; choose the one that works best for you. Save the results to a new dataframe called `md_cities_rates`.
 
 ```{r}
+md_cities_rates <- md_cities |>
+  mutate(
+violent_rate_2019 = (violent_crime_2019 / population_2019) * 100000,
+property_rate_2019 = (property_crime_2019 / population_2019) * 100000,
+violent_rate_2020 = (violent_crime_2020 / population_2020) * 100000,
+property_rate_2020 = (property_crime_2020 / population_2020) * 100000
+)
 ```
 
 ### Task 4: Describe the Rates
 
 Examine the new dataframe, `md_cities_rates`, by clicking on it in the Environment tab in RStudio and sorting by the rate columns. Write a couple of sentences about the results, comparing and contrasting the cities with the highest rates (both violent and property) in 2019 and 2020. Do you see any patterns? What does this tell you about crime in Maryland cities? What's the story here?
 
-ANSWER HERE
-
+The highest amount of crime in Maryland cities occurred in Baltimore through violent and property crimes in both years. Yes, Baltimore had the highest rate of crime because of it's large population, but other places were very close to as much. I definitely see the pattern that crime was less in 2020 in both violent and property crimes than in 2019. The existence of Covid in 2020, may have something to do with that. The story to me is how covid decreased the crime rate in Baltimore during 2020.
 
 ### Task 5: Calculate Percentage Change
 
 Let's add two percentage change columns to your dataframe: one for violent crime rates and one for property crime rates. You'll calculate the percentage change between 2019 and 2020 for each city. Save the results to a new dataframe called `md_cities_change`.
 
 ```{r}
+
+md_cities_change <- md_cities_rates |>
+  mutate(
+    violent_change_pct = ((violent_rate_2020 - violent_rate_2019) / violent_rate_2019) * 100,
+    property_change_pct = ((property_rate_2020 - property_rate_2019) / property_rate_2019) * 100
+  )
+
 ```
 
 ### Task 7: Describe Percentage Changes
 
 Look at the `md_cities_change` dataframe by clicking on it in the Environment tab in RStudio. Write a couple of sentences describing the percentage change results. What's more interesting here, the patterns or the outliers? What's the story in the data?
 
-ANSWER HERE
+
+The largest violent percentage change was in Edmonston, it was extremely high in 2020 compared to 2019, I wonder why that is the case because of the nature of 2020. Cecilton had the highest property crime percentage change , but an extremely negative violent percentage change. Was there something that happened in Cecilton that caused this vast difference. Baltimore was negative in both. The story is that the percentage change for both property and violent crimes were negative. Meaning that crime as a whole was down.
 
 ### Task 8: Tell the Best Story
 
 Write up a lede and nutgraf of a story with the _best_ story idea you've found in this assignment. The lede should be a single sentence that summarizes the most important information in the data. The nutgraf should be a paragraph that provides more context and explains why the data is important.
 
-ANSWER HERE
+Crime rates significantly decreased in 2020 in Maryland most likely due to the Covid-19 pandemic.
+
+In cities like Baltimore that usually see the highest crime rates in the state, saw both property and violent crime rates decrease from 2019 to 2020.
+
+Despite some outliers that saw major jumps from 2019 to 2020, Maryland as a whole saw violent and property crime rates decrease consistently.
 
 ### Task 9: Save Your Work and Put it on GitHub
 
 Save this notebook, then commit it to your local repository. Push the changes to your GitHub repository and submit the URL for this file in ELMS.
+
+Hi, so my computer broke and I’m currently using a Chromebook that I’m not able to download R on, so I had to use AI in some of the code for this. I tried my best to use R on the computers at Knight Hall, and some of it worked, but it took a long time and wasn't loading properly. I apologize for the inconvenience. I did my best with the cards I’ve been dealt to complete this assignment, and I was able to review the data tables and calculate what was needed. 
+
+## Task 10: Using the 2020 violent crime rate, calculate the percentiles using `ntile()`. Save the results to a new dataframe called `md_cities_percentiles`. How many cities are above the 90th percentile? Calculate the Interquartile Range of the 2020 violent crime rate using `summarize()` and R's `IQR()` function. 
+The syntax is similar to how `mean()` works.
+
+```{r}
+md_cities_percentiles <- md_cities_rates |> 
+mutate(percentile = ntile(violent_rate_2020, 100))
+md_cities_IQR <- md_cities_rates |> 
+summarize(IQR = IQR(violent_rate_2020))
+```
+
+
+
+Do the results change your best story idea from the previous assignment? Why or why not?
+
+No, my results changed because I saw that the crime in 2020 was skewed to the right and it made it clear that certain cities had their crime affected by the added data, but my story didn't change. There is still a lot of outliers in the data and crime was still decreased in 2020. Considering that the IQR that I calculated was only 2020, the change from 2019 to 2020 didn't change, therefore the story idea I had in the previous homework assignment still works as Baltimore still saw the highest crime rate and all of the elements I used in my lede and a few graphs still stand true after the added information. 
