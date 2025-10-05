@@ -1,0 +1,118 @@
+---
+title: "HW7_MandMs"
+date: 10/1/2025
+---
+
+
+In this assignment, you'll be picking up where you left off with the M&Ms activity. You'll load the data and perform some basic statistical analysis. Follow the steps below to complete the assignment.
+
+### Task 1: Load the tidyverse
+
+```{r}
+library(tidyverse)
+```
+
+
+### Task 2: Load an M&Ms dataset from https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/mandms.csv
+```{r}
+mm_data <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/mandms.csv")
+```
+
+
+### Task 3: Sample 5 rows of data from the dataset, and then sample 10 rows, saving each to separate dataframes called sample5 and sample10. Be sure to use set.seed(1234) before you start.
+```{r}
+sample_5 <- mm_data |>
+sample_n(5)
+
+sample_10 <- mm_data |>
+sample_n(10)
+
+
+```
+
+
+### Task 4: Calculate the mean, median and standard deviation of red M&Ms from each of the samples.
+```{r}
+sample_5 |> summarize(mean = mean(red), median = median(red), sd =sd(red))
+
+
+sample_10 |> summarize(mean = mean(red), median = median(red), sd =sd(red))
+
+
+```
+Sample_5: mean - 75.6	  median - 73. sd - 18.51486	
+
+Sample_10: mean: 64.6  median - 63. sd - 14.91606
+
+### Task 5: Calculate the mean, median and standard deviation of red M&Ms from the population
+
+```{r}
+mm_data |> summarize(mean = mean(red), median = median(red), sd =sd(red))
+
+```
+mean - 72.98. median - 72. sd - 16.45808
+### Task 6: Make three histograms: one each for sample5, sample10 and the original dataset. Include a headline. Use a consistent binwidth.
+
+```{r}
+mm_data |>
+ ggplot() + 
+  geom_histogram(aes(x = red), binwidth = 2) +
+    geom_vline(aes(xintercept = mean(red)), color = "red", linetype = "dashed", size = 2) +
+  geom_vline(aes(xintercept = mean(red) - sd(red)), color = "blue", linetype = "dashed", size = 2) +
+  geom_vline(aes(xintercept = mean(red) + sd(red)), color = "blue", linetype = "dashed", size = 2) +
+labs(
+  title = "Total Population of Red M&Ms",
+  y = "Different samples",
+  x = "Mean of Red M&Ms"
+)
+
+
+sample_5 |>
+ ggplot() + 
+  geom_histogram(aes(x = red), binwidth = 2) +
+    geom_vline(aes(xintercept = mean(red)), color = "red", linetype = "dashed", size = 2) +
+  geom_vline(aes(xintercept = mean(red) - sd(red)), color = "blue", linetype = "dashed", size = 2) +
+  geom_vline(aes(xintercept = mean(red) + sd(red)), color = "blue", linetype = "dashed", size = 2) +
+labs(
+  title = "Sample of Five Red M&Ms",
+  y = "Different samples",
+  x = "Mean of Red M&Ms"
+)
+
+sample_10 |>
+ ggplot() + 
+  geom_histogram(aes(x = red), binwidth = 2) +
+    geom_vline(aes(xintercept = mean(red)), color = "red", linetype = "dashed", size = 2) +
+  geom_vline(aes(xintercept = mean(red) - sd(red)), color = "blue", linetype = "dashed", size = 2) +
+  geom_vline(aes(xintercept = mean(red) + sd(red)), color = "blue", linetype = "dashed", size = 2) +
+labs(
+  title = "Sample of Ten Red M&Ms",
+  y = "Different samples",
+  x = "Mean of Red M&Ms"
+)
+
+
+```
+
+
+### Task 7: Answer questions
+
+
+Compare the three sets of means, standard deviations and histograms. Which are more helpful to you in understanding the accuracy of the samples?
+
+The highest mean of the three sets was the smallest sample of five, but the lowest mean was the sample of ten. The Sample of five was much more similar to the population with a median of 73 compared to a population median of 72, while the median of the sample of ten was 63. The highest standard deviation was the sample of five, the lowest was the sample of ten and the population was the middle.
+
+What does this exercise tell you about the relationship between sample size and estimate accuracy?
+
+This exercise tells me that a random sample can be very accurate to the stats of the full population, but can also be quite incorrect comparatively to the overall sample. 
+
+How does random sampling introduce variation into statistical estimates?
+
+Random sample introduces variation into statistical estimates because it shows that samples in an entire population can vary very differently compared to others, there's a lot of ways it can be different.
+
+If you repeated this process, would the samples always be identical? Why or why not?
+
+No, the samples would not always be identical. It's odd that the smaller sample was more similar to the entire population than the bigger sample. So I'd assume that there would be a difference in those results if the process was repeated.
+
+
+When finished, save your work, switch to GitHub Desktop, then add, commit and push your changes to GitHub and submit the URL of the notebook in ELMS.
