@@ -1,0 +1,193 @@
+Benjamin Messinger
+
+---
+title: "midterm_key_oct_8"
+author: "Rob Wells"
+date: "2025-10-15"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# JOUR405: Statistics for Journalists
+## Midterm Exam - Fall 2025
+
+Benjamin Messinger
+
+For this exam, you'll analyze several datasets using R and the statistical concepts we've covered in class. Load the tidyverse before beginning, then complete each task. Write your code in the provided blocks and answer the questions in complete sentences.
+
+# Load tidyverse
+```{r}
+library(tidyverse)
+```
+
+## Part 1: Restaurant Health Inspections (25 points)
+
+The first dataset contains restaurant health inspection scores from Montgomery County. Load the data from: `https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/montco_inspections.csv`
+
+The dataset includes the name of the establishment, the number of points for critical and non-critical areas, the total points, maximum points possible and the compliance score and grade.
+
+## Task 1: Read the data**
+```{r}
+montgomery_county_resturants <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/montco_inspections.csv")
+```
+
+
+## Task 2: Calculate the mean and standard deviation maximum and minimum of compliance scores. Put the results in a new dataframe called "compliance_stats." 
+```{r}
+compliance_stats <- montgomery_county_resturants |>
+  summarize(mean_compliance_score = mean(compliance_score),
+          min_compliance_score = min(compliance_score),
+          max_compliance_score = max(compliance_score),
+          sd_compliance_score = sd(compliance_score)
+              )
+
+
+```
+Mean = 96.30665  Minimum = 42 Maximum = 100 standard deviation = 5.826279
+
+## Task 3: Create a histogram of the compliance scores with a vertical line showing the mean. Include a headline. Include a headline and label the x and y axes.
+```{r}
+montgomery_county_resturants |> 
+  ggplot() + 
+  geom_histogram(aes(x = compliance_score), binwidth = 0.05) +
+  geom_vline(aes(xintercept = mean(compliance_score)), color = "red", linetype = "dashed", size = 0.25) +
+labs(
+  title = "Compliance Scores of Montgomery County Resturants",
+  y = "Frequency",
+  x = "Compliance Scores"
+)
+```
+
+## Task 4: Write 2-3 sentences interpreting what the standard deviation and histogram tell us about the distribution of compliance scores. What would be newsworthy about this distribution? What's the story here? 
+
+**Write your answer here:**
+
+The standard deviation of the compliance scores of Montgomery County Resturants was 5.826279, which tells us that the results of  compliance scores were close together, the majority of scores were closer to 100. The mean of 96.30665, in the histogram shows that most resturants received good scores. The story here is what are the qualifications on how compliance scores are graded as most resturants received high scores, the majority of resturants in Montgomery County are compliant. 
+
+
+## Part 2: High School Athletics (30 points)
+
+The second dataset shows participation numbers in high school sports across Maryland counties in 2024, broken down by sport and gender. Load the data from: `https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_hs_participation.csv`
+
+# Task 5: Load the high school participation data
+```{r}
+
+Maryland_hs_sports <- read_csv ("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_hs_participation.csv")
+#your code here
+```
+
+
+#Task 6: Add two columns called total and girls_pct.  
+Add two columns called total and girls_pct using mutate(), with the total adding together boys and girls and girls_pct being the percentage of the total represented by girls participants. 
+```{r}
+#your code here
+
+Maryland_hs_percentages <- Maryland_hs_sports |>
+    mutate(
+      total = boys + girls,
+      girls_pct = girls/total * 100
+    )
+```
+
+#Task 7: Calculate correlation between boys and girls participation
+```{r}
+Maryland_hs_percentages |> summarize(correlation = cor(boys, girls, method="pearson"))
+
+```
+Correlation: 0.982419	
+#Task 8: Create a scatterplot showing this relationship, adding a line of best fit. Include a headline and label the x and y axes.
+```{r}
+Maryland_hs_percentages  |> 
+  ggplot() +
+  geom_point(aes(x=boys, y=girls)) +
+  geom_smooth(aes(x=boys, y=girls), method="lm") +
+  labs(title = "Correlation between Boys and Girls", x ="Boys", y ="Girls")
+
+```
+
+
+# Task 9: In 2-3 sentences, explain what the correlation coefficient and scatterplot reveal about gender equity in Maryland high school sports participation. How do you interpret the school districts that are below the line vs those that are above? Which school districts are most worth examining further, and why? (10 points)
+
+**Write your answer here:**
+
+The correlation  was 0.982419 and the scatterplot which reveals that the amount of girls and boys in Maryland high school sports was relatively close throughout the 24 counties, with the majority of districts having more boys than girls student athletes. The districts above the line of best fit have more girl student athletes while those under the line have more boy student athletes. Charles County Public Schools has to be examined because less than 40% of their 1552 student athletes are girls. Somerset County Public Schools has just around 35.3% of athletes being girls, but they only have 300 student athletes. Allegany County Public Schools and Carroll County Public Schools have just over 40% of athletes being girls as their totals are well over 1000 student athletes.
+
+## Part 3: Maryland Car Theft Rates (25 points)
+
+Your editor has assigned you a story about car thefts in Maryland and wants you to analyze the data to find out which counties have the highest rates. The fourth dataset contains car theft statistics for Maryland counties in 2023 and population. Load the data from: `https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_car_thefts.csv` and complete the following tasks:
+
+#Task 10: Load the car thefts data
+```{r}
+#your code here
+
+Md_car_thefts <- read_csv("https://raw.githubusercontent.com/dwillis/jour405/refs/heads/main/data/md_car_thefts.csv")
+```
+
+#Task 11: Using mutate, add a column that calculates the rate of car thefts for each county - you need to choose the per capita rate 
+```{r}
+#your code here
+md_car_thefts_rates <- Md_car_thefts |> 
+  mutate(
+    car_theft_rate = (`2023` / population) * 100,
+      car_theft_rate = (`2022` / population) * 100
+)
+
+```
+
+#Task 12: Calculate the median car theft rate and the total number of car thefts statewide. Which counties have rates above the median? 
+```{r}
+#your code here
+md_car_thefts_rates |>
+summarize (
+  median_car_theft_rate = median(car_theft_rate)
+)
+  
+```
+
+Median = 0.08431727	
+
+Counties above the median: Caroline County, Charles County, Washington County, Cecil County, Montgomery County, Howard County, Baltimore County, Anne Arundel County, Dorchester County, St. Mary's County, Prince George's County, Baltimore City
+#Task 13: Write 2-3 sentences describing what these calculations reveal about the distribution of car thefts in Maryland. What's the lede of a story about your findings? 
+
+**Write your answer here:**
+
+Baltimore City - 0.54193311 and Prince George's County - 0.44433561  have Car Theft rates well above the median of 0.08431727, while Somerset County has the lowest car theft rate. The median amount of car theft rates in Maryland with a per capita of 100 is below 0.1 and 10 counties have rates above 0.1.
+
+Lede:
+
+Baltimore City and Prince George's County had the highest rate of car thefts in Maryland. 
+
+Both counties had a car theft right four and five times more than the median rate in Maryland. 
+## Part 4: Data Analysis Scenario (20 points)
+
+#Task 14: Essay Question.
+
+You receive a tip that local emergency response times have gotten significantly worse over the past year. You obtain monthly data on response times for police, fire and ambulance calls.
+
+Write 3-4 sentences explaining:
+1. What statistical measures would you calculate to verify this claim? (10 points)
+2. What visualizations would help readers understand the trends? (5 points)
+3. What additional context or data would you need to make this a complete story? (5 points)
+
+**Write your answer here:**
+
+To verify that emergency response times have gotten significantly worse over the past year, I would calculate the average times of response times in this past year and compare it to the average times of the last five. I would calculate the percentage change for each month to see if it has steadily decreased over the year. 
+
+A histogram comparing the average response times for each year over the last five years would represent if response time has decrease over recent years and would also create a histogram displaying each month in the past year to represent how response time has decreased. 
+
+I would add the context of the amount of police, fire and ambulance calls occurred in each month and each year to show if there has been more or less calls, causing this trend. As werll as if there was any new policies in these departments that have slowed down these responses. 
+
+# Excellent Response
+
+
+### Submission Instructions
+- Save your work frequently
+- Make sure all code blocks run without errors
+- Provide clear explanations for your analytical choices
+- Submit both your code and written responses
+- Load this test to GitHub and submit the link in Elms
+
+Good luck!
