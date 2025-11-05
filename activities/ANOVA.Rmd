@@ -1,6 +1,6 @@
 ---
 title: "ANOVA for Journalists: Analyzing College Admissions Test Scores"
-date: 8-22-2025
+date: 11-3-2025
 ---
 
 ```{r setup, include=FALSE}
@@ -60,10 +60,17 @@ admission_summary <- admissions_data |>
 print(admission_summary)
 ```
 
+Context: Fall 2024 midpoint SAT for University of Maryland was 1,465.
+
+
 **Task 3** Describe the data
 
 Write a couple of sentences describing the differences in SAT scores between types of colleges, using the descriptive statistics we just generated.
 
+
+**Task 3: Write your answer here:**
+
+Private schools had the highest mean and median scores and has the lowest standard deviation, which means that their scores are the highest and are the most closely ranged together, it bad the highest minimum and highest maximum Community colleges has the lowest mean, median, minimum and maximum -- it also had the highest standard deviation which means it has the highest range of lower scores. Public schools are in the middle, had the same max score as private schools, but had the middle scores for every other statistic -- public schools are the middle ground. 
 
 
 ## Task 4: Visualize the Data
@@ -108,6 +115,29 @@ summary(anova_result)
 
 The F-value is huge (284.3). The F-value measures the ratio of between-group variance to within-group variance, and this high value suggests the differences between college types far outweigh the variation within each type. The p-value is very low, indicating the differences between college types are statistically significant at any reasonable significance level. The three asterisks (***) highlight that this is significant at the 0.001 level. So we can say that with confidence that there are real differences in SAT scores between the three types of colleges.
 
+How do we know the F-value is huge?
+We can calculate the critical value for an F statistic by using the qf() function in R
+
+```{r}
+# Your ANOVA has:
+# df1 (between groups) = 2
+# df2 (within groups/residuals) = 297
+# Common alpha levels: 0.05, 0.01, 0.001
+
+# Critical values at different significance levels:
+critical_f_05 <- qf(0.95, df1 = 2, df2 = 297)
+critical_f_01 <- qf(0.99, df1 = 2, df2 = 297)
+critical_f_001 <- qf(0.999, df1 = 2, df2 = 297)
+
+cat("Here are the Critical F-values:\n")
+cat("alpha of α = 0.05: ", round(critical_f_05, 3), "\n")
+cat("alpha of α = 0.01: ", round(critical_f_01, 3), "\n")
+cat("alpha ofα = 0.001:", round(critical_f_001, 3), "\n")
+cat("The F-statistic is: 284.3\n")
+cat("Ratio to most extreme critical value (α=0.001) to the F statistic:", round(284.3/critical_f_001, 1), "x\n")
+```
+
+
 ## Task 5: Compare the differences between specific pairs
 
 ```{r post-hoc}
@@ -129,8 +159,17 @@ All comparisons show extremely small p-values, indicating these differences are 
 Based on our analysis, we can now answer:
 
 1. Is there a significant difference in SAT scores across college types?
+
+Yes, there is a significant difference in SAT scores across college types, Private schools have the highest scores, public schools are in the middle and community colleges are in the middle. Public schools are close to private schools, but there's still an average difference of 74.40 points. There's a much bigger difference between publuc and community college at 292.55 points and private and community colleges at 366.96 points. The 0.05 alpha value is 3.026, the 0.01 alpha value is 4.677, the 0.001 alpha value is 7.071 and the f-statistic is 284.3, because all these values are much lower than the f-statistic, meaning its very statistically significant. The p value all exceed the threshold. 
+
 2. Which specific college types differ from each other?
+
+Public and private differ in 74.4 difference in means at the 2.1e-05 significance level. Community colleges and private schools differ in mean by 366.95 at the 0.0e+00 significant level. Community colleges and public schools differ in mean by 292.55140 at a 0.0e+00 significance level. The difference between public and private is actually more significant than the other two because of its  2.1e-05 p value.
 3. How large are these differences?
 
+The difference between the means of private schools and community colleges is 366.96 points. The difference in means between private schools and public schools is 74.40 points. The difference in means between public schools and community colleges is 292.55 points.
+
 Answer those questions, providing evidence for your answers, and then write a headline and a lead paragraph reporting these findings using active voice and focusing on the differences across types.
+
+Private and public school students scores significantly higher than community college students on the SAT.
 
