@@ -1,0 +1,59 @@
+---
+title: "Project 1"
+author: "Messinger"
+output: html_document
+date: "2025-11-12"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+
+```{r}
+billboard <- read_csv("Billboard Hot 100 Number Ones Database - Data.csv")
+```
+
+This data looks at the Billboard Hot 100 charts for every song that has been ranked No. 1 on the chart since the charts began in 1958. Over 1177 different songs have been ranked No. 1 on the chart. Starting with Aug. 4, 1958 and most recently Jan. 11, 2025. 
+
+This data logs the amount of weeks each song was No. 1 on the Billboard Hot 100 charts, as well as the amount of nonconsecutive weeks each song was No. 1. Each song also gets three different ratings, that are calculated to create an overall rating. 
+
+The data also labels the Divisiveness score, the label of each song, the parent label of each song, CDR genre and style, discogs style and genre, the artists structure, featured artists and the amount of lead voalists on the song. 
+
+The data gives every possible information about the credits of the song and then it gets into actual statistics based on the song. The data displays the simplified key, beats per minute, happiness that the song gives people, loudness, acousticness, dancebility, energy and if its vocally or base based. 
+The most important columns for my analysis will be those statistics at the end of the data set -- eats per minute, happiness, loudness, acousticness, dancebility and energy. Those statistics will best diversify each song into what my project is trying to research, why are some songs more highly regarded as a No. 1 on the Billboard Hot 100 than others. Those three sets of rating, along with the overall rating calculation will also be important for my analysis. In giving each song a rating it will be able to rank the best of the No. 1 songs on the Billboard Hot 100. 
+
+Also the amount of weeks on the chart could be useful, the greater amount of weeks can correlate to the song being more popular or highly regarded compared to songs that were breifly ranked No. 1. Shaboozy's "A Bar Song (Tipsy)" had the most weeks on the Billboard Hot 100, but only had a 6.33 overall rating and not particlularly high danceability, happiness and energy. "Old Town Road" by Lil Nas X and Billy Ray Cirus was also No. 1 for 19 weeks, but again only had an overall rating of 6.67. "I Will Always Love You" by Whitney Houston was only No. 1 for 14 weeks, but has a 10.0 overall rating, so that song may be a greater factor than the others even if it wasn't No. 1 for as long. Nine songs were rated 10.0, yet were only No. 1 for one week, including great songs like Taylor Swift's "All Too Well (10 Minute Version)", The Temptations' "My Girl" and "Dancing Queen" by ABBA. 
+
+The highest Acousticness was "Love Theme from Romeo and Juliet" by 	Henri Mancini & His Orchestra, but was No. 1 for two weeks and had an overall rating of 5.0. "What a Fool Believes" by The Doobie Brothers was the only song with a Happiness score of 99, but had a 4.00 rating. The highest danceability was "Give It To Me" by Timbaland ft. Nelly Furtado & Justin Timberlake at 98, tied with Ice Ice Baby by Vanila Ice. That said, Ice Ice Baby had an overall rating of 3.33, they just needed to stop, collaborate and listen. 
+
+I also think that release date and when it was on the Billboard Hot 100 will be beneficial to show what era the best songs were released in since 1958. Also, different types of genre would be beneficial to look at to see which songs were rated the best per genre. 
+
+Unfortanetly, Bruce Springsteen never had a No. 1 of his own (I'm a big fan of the boss), but he wrote a No. 1 song. Blinded by the Light by Manfred Mann's Earth Band was written by Springsteen and was No. 1 for one week and had an overall rating of 7.0. 
+
+Taylor Swift had 12 songs that were ranked No. 1 on the Billboard Hot 100, "Anti-Hero" was on the list the longest for eight weeks.
+
+The thing that I would want most in my data would be amount of listeners or CDs sold, some type of metric to track how many people went and bought the song and listened to it -- how much did each song make. That said, with cassetts, vynls, CDs and now streaming, it's hard to quantify those statistics, but I think it'd be beneficial for my data. 
+
+
+Hypothesis: The highest rated songs won't be the oldest or the newest, but somewhere in the middle like the 1970s or 1980s
+
+Hypothesis: The highest rated 100 songs will include multiple songs from the same artist
+
+Hypothesis: The highest happiness songs will be some sort of pop songs with high energy and dancebility. The lowest happiness will have low energy and danceability, but will have higher ratings. 
+
+Hypothesis: The songs with the highest happiness will be songs released after 2000. 
+
+How would I be able to create a model that will use all the statistics in the data to create a different statistic to rank the best No. 1 songs of the Billboard Hot 100?
+
+What type of code would I need to use to create a model to make this data significant?
+
+What type of models will accurately represent the best No. 1 songs on the  Billboard Hot 100?
+
+What songs will be ranked the best after I create a model statistic that will be able to rank the best No. 1 songs using all the data?
+
+How will I separate each song by when it was created, genre, danceability, rating an other statistics used?
