@@ -10,13 +10,171 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r}
+install.packages("janitor") 
 library(tidyverse)
+library(lubridate)
+library(janitor)
+library(knitr)      # For nice tables
+library(scales)     # For better axis formatting
 ```
 
 
 ```{r}
-billboard <- read_csv("Billboard Hot 100 Number Ones Database - Data.csv")
+billboard <- read_csv("_Frank Billboard Hot 100 Number Ones Database - Data.csv") |>
+
+clean_names() |>
+mutate(date_new = dmy(date)) |> 
+mutate(date_new = if_else(year(date_new) > 2024,  date_new - years(100), date_new)) |> 
+select(date_new, everything())
 ```
+
+```{r}
+billboard |>
+  summarize(mean_overall_rating = mean(overall_rating),
+          median_overall_rating = median(overall_rating),
+          min_overall_rating = min(overall_rating),
+          max_overall_rating = max(overall_rating)
+              )
+
+```
+Mean: 6.130518	 Median: 6 Min: 1 Max:1 Overall rating
+
+This set of code gives me the mean rating of the overall population of songs and therefore I can compute what is the average rating for a good or bad song as I will eventually use in the graphs and Z-scores later on. 
+
+```{r}
+billboard |>
+  summarize(mean_danceability = mean(danceability, na.rm = TRUE),
+          median_danceability = median(danceability, na.rm = TRUE),
+          min_danceability = min(danceability, na.rm = TRUE),
+          max_danceability = max(danceability, na.rm = TRUE)
+              )
+```
+mean_danceability: 62.94723 median_danceability: 64 min_danceability: 14 max_danceability: 98
+
+
+This gives the mean, maximum, median and minimum danceability scores for all of the No. 1 songs on the Billboard Hot 100. The mean danceability is 62.9473, the median is 64, the minimum is 14 and the maximum danceability score is 98.
+
+
+```{r}
+billboard <- billboard |>
+  mutate(decade = floor(year(date_new) / 10) * 10)
+
+```
+
+This set of code creates a section in my data set that categorizes each song by decade. This will help me use a category of years of the song's release in my graphs and data. This is a very important set of code for trying to find what decade has the best music. 
+```{r}
+
+# Calculate z-scores
+billboard <- billboard |>
+  mutate(
+   mean_overall_rating = mean(overall_rating),
+    sd_overall_rating = sd(overall_rating),
+    z_score = (overall_rating - mean_overall_rating) /   sd_overall_rating
+  )
+
+# Display the data with z-scores
+billboard |>
+  select(song, overall_rating, z_score) |>
+  head(100) 
+```
+
+This gives the Z-score for every song in the data set, this gives me a good guideline to see if each of these scores are statistically significant and what can be considered a good or bad overall rating. These 100 rows of Z-scores take a random sample of 100 songs and calculates the Z-score for each of those songs, to compare the mean and standard deviations of each of these ratings. 
+
+```{r}
+# Create a clean factor for the plot legend
+billboard <- billboard |>
+  mutate(rating_type = case_when(
+    z_score > 5 ~ "Good",
+    z_score < 5 ~ "Bad",
+    TRUE ~ "Normal"
+  ))
+
+ggplot(billboard, aes(x = decade, y = overall_rating, color = rating_type)) +
+  geom_point(size = 2) +
+  scale_color_manual(
+    values = c(
+      "Normal" = "gray50",
+      "Good" = "red",
+      "Bad" = "blue"
+    )
+  ) +
+
+ theme_minimal() +
+  labs(
+    title = "Billboard No. 1 Songs – Good and Bad Rated Songs per decade",
+    subtitle = "Good rated songs = |z-score| > 5",
+    x = "Year",
+    y = "Overall Rating",
+    color = "Rating Category"
+  ) +
+  scale_y_continuous(labels = comma) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+This is a visualization of the overall ratings of songs per decade catergorized between the ratings of above or below 5. This computes the ratings of each of these songs in the sample of 100 songs to show the distribution of lower rated songs and higher rated songs per decade since 1950. 
+```{r}
+# Create density plot showing overlapping distributions
+ggplot(billboard, aes(x = danceability, fill = decade)) +
+  geom_density(alpha = 1) +
+  labs(
+    title = "Danceability Scores per Song",
+    x = "Danceability Scores",
+    y = "Amount of songs",
+    fill = "song"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1")
+```
+
+On this graph I used the danceability scores as a model to tell the amount of songs have higher or lower danceability scores as well and the distribution of decade between the danceability scores that were in this data set.
+```{r boxplot}
+# Create boxplot for another view
+ggplot(billboard, aes(x = danceability, y = decade, fill = overall_rating)) +
+  geom_boxplot() +
+  labs(
+    title = "Danceability scores per decade",
+    x = "danceability",
+    y = "decade"
+  ) +
+  theme_minimal() +
+  scale_fill_brewer(palette = "Set1")
+```
+
+This graph creates a box plot of the decade where there are the most songs that are danceable. The F value is 145.4. The F-value measures the ratio of between-group danceability scores with a high value, suggesting that there is differences between danceability scores and when the song was released. The p-value is very low, indicating the differences between danceability scores and decades are statistically significant at any reasonable significance level. The three asterisks (***) highlight that this is significant at the 0.001 level. So we can say that with confidence that there are real differences in danceability scores between decades. 
+
+
+```{r anova-test}
+# Run one-way ANOVA
+anova_result <- aov(danceability ~ decade, data = billboard)
+summary(anova_result)
+```
+
+```{r}
+# Your ANOVA has:
+# df1 (between groups) = 1
+# df2 (within groups/residuals) = 206
+# Common alpha levels: 0.05, 0.01, 0.001
+
+# Critical values at different significance levels:
+critical_f_05 <- qf(0.95, df1 = 1, df2 = 206)
+critical_f_01 <- qf(0.99, df1 = 1, df2 = 206)
+critical_f_001 <- qf(0.999, df1 = 1, df2 = 206)
+
+cat("Here are the Critical F-values:\n")
+cat("alpha of α = 0.05: ", round(critical_f_05, 3), "\n")
+cat("alpha of α = 0.01: ", round(critical_f_01, 3), "\n")
+cat("alpha ofα = 0.001:", round(critical_f_001, 3), "\n")
+cat("The F-statistic is: 145.4\n")
+cat("Ratio to most extreme critical value (α=0.001) to the F statistic:", round(145.4/critical_f_001, 1), "x\n")
+```
+
+alpha of α = 0.05:  3.887 
+alpha of α = 0.01:  6.76 
+alpha ofα = 0.001: 11.145 
+The F-statistic is: 145.4
+
+The F-statistic being 145.5 means that there is a significant difference because all these values are much lower than the F-statistic, therefore the p value all exceed the threshold. So This data between danceability scores and decades where the songs were created are significant through the ANOVA tests through F-statistic and alpha values.n 
+
 
 This data looks at the Billboard Hot 100 charts for every song that has been ranked No. 1 on the chart since the charts began in 1958. Over 1177 different songs have been ranked No. 1 on the chart. Starting with Aug. 4, 1958 and most recently Jan. 11, 2025. 
 
@@ -57,3 +215,9 @@ What type of models will accurately represent the best No. 1 songs on the  Billb
 What songs will be ranked the best after I create a model statistic that will be able to rank the best No. 1 songs using all the data?
 
 How will I separate each song by when it was created, genre, danceability, rating an other statistics used?
+
+
+
+Part 2:
+
+My biggest errors when transmitting my code was downloading the packages and having to update them. For some reason, I kept having to reload packages or making sure different packages were downloaded. Therefore, it took me some time and frustration to get this part done. I had some issues figuring out how to get my code to work as the original new code you put in the canvas message wasn't wotking, but that was just because I didn't have the correct packages downloaded. 
