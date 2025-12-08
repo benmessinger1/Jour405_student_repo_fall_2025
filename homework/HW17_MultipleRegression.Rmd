@@ -30,6 +30,10 @@ Before building our model, let's explore the data to understand the variables an
 ANSWER HERE
 
 
+The cities with the higher percentage of white people typically have a higher voter turnout, that seems like there is a correlation between those two variables. Also cities with a lower percentage of unemployed people typically have a higher voter turnout, that seems like there is a correlation between those two variables. I don't think there's much correlation between the median age and turnout and lower populations can have a higher voter turnout but also may not.
+
+
+
 ```{r}
 # Summary statistics
 summary(md_turnout)
@@ -90,7 +94,10 @@ The coefficients tell us the estimated effect of each independent variable on th
 
 Examine the output of the model, checking the coefficients, residuals, and overall model fit. How well does this multiple variable model predict turnout? Do any of the variables seem to be insignificant? Is this a useful model, based on what you've seen? Why?
 
+
 ANSWER HERE
+This multiple variable model predict turns out pretty good, It shows that cities with a high percentage of white people, low percentage of unemployed and low populations have a high voter turnout. Income, median age and bachelors seem pretty insignificant, they have scatterplots that are pretty varied and there isn't a high correlation at the top or bottom of the graphs. The Adjusted R-squared is 0.8023 which means there's there's a bunch of variation in turnout as the p-value of being 2.999e-06 shows that it is highly significant with Income, median age, and being white, but significantly with edication, unemployment and population. 
+
 
 ```{r}
 # Build initial model with all predictors
@@ -104,19 +111,22 @@ summary(initial_model)
 
 Create three alternative models by adding or removing variables to see if we can improve the model's performance. Turnout will always be the dependent variable, but you should alter the independent variables by removing or adding some. Then compare the models using adjusted R-squared values. Are any of the models significantly better than the others?
 
+
+
+Yes, the percentange of unemployed people was much more significant when any other independent variables and the least significant model was population. By comparing those models the percentage of unemployed people directly correlated with voter turnout, and was significantly better than the others.
 ANSWER HERE
 
 ```{r}
 # Model 2
-model2 <- lm(turnout ~ REPLACE ME, data = md_turnout)
+model2 <- lm(turnout ~ median_age, data = md_turnout)
 summary(model2)
 
 # Model 3
-model3 <- lm(turnout ~ REPLACE ME, data = md_turnout)
+model3 <- lm(turnout ~ pct_unemployed, data = md_turnout)
 summary(model3)
 
 # Model 4
-model4 <- lm(turnout ~ REPLACE ME, data = md_turnout)
+model4 <- lm(turnout ~ population, data = md_turnout)
 summary(model4)
 
 # Compare models
@@ -144,5 +154,8 @@ ggplot(model_comparison, aes(x = reorder(Model, Adjusted_R_squared), y = Adjuste
 ## Task 4: Using the Model (3 points)
 
 Without using the words "multiple regression model", describe how you could use this analysis to cover an election or voter participation story.
+
+
+I can use this analysis to cover an election or voter participation story to see what variables can be best looked at in terms of finding out what variables are most important in viewing a place or state or city when looking at a poll on who votes in what cities and the amount of people who vote in different places.
 
 ANSWER HERE
