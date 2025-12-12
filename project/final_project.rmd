@@ -2,7 +2,7 @@
 title: "Project 1"
 author: "Messinger"
 output: html_document
-date: "2025-11-12"
+date: "2025-12-12"
 ---
 
 ```{r setup, include=FALSE}
@@ -18,6 +18,11 @@ library(knitr)      # For nice tables
 library(scales)     # For better axis formatting
 ```
 
+Null Hypothesis: All decades had an even distribution of top-rated songs.
+Alternative Hypothesis: The highest rated and most danceable songs won't be the oldest or the newest, but somewhere in the middle like the 1970s or 1980s
+
+
+Using read_csv, I will load the data. The clean_names function parses the dates normally, then subtracts 100 years from any date that's in the future.
 
 ```{r}
 billboard <- read_csv("_Frank Billboard Hot 100 Number Ones Database - Data.csv") |>
@@ -27,7 +32,10 @@ mutate(date_new = dmy(date)) |>
 mutate(date_new = if_else(year(date_new) > 2024,  date_new - years(100), date_new)) |> 
 select(date_new, everything())
 ```
+The data set is now downloaded as billboard, this will tell R what data I am using for these tests.
 
+
+Using the summarize function, I get the mean rating of the overall population of songs. Therefore, I can compute what is the average rating for a good or bad song as I will eventually use in the graphs and Z-scores later on. 
 ```{r}
 billboard |>
   summarize(mean_overall_rating = mean(overall_rating),
@@ -37,10 +45,12 @@ billboard |>
               )
 
 ```
-Mean: 6.130518	 Median: 6 Min: 1 Max:1 Overall rating
+Overall rating: Mean: 6.130518  Median: 6 Minimum: 1 Maximum: 10 
 
-This set of code gives me the mean rating of the overall population of songs and therefore I can compute what is the average rating for a good or bad song as I will eventually use in the graphs and Z-scores later on. 
+The mean overall rating is 6.130518, the median is 6, the minimum is 1 and the maximum is 10. Using this information, I can accurately designate how overall rating will be distributed in the tests moving forward.
 
+
+Using the summarize function, this set of code gives me the mean danceability of the overall population of songs. It also gives me the maximum, median and minimum danceability scores for all of the No. 1 songs on the Billboard Hot 100. 
 ```{r}
 billboard |>
   summarize(mean_danceability = mean(danceability, na.rm = TRUE),
@@ -49,19 +59,27 @@ billboard |>
           max_danceability = max(danceability, na.rm = TRUE)
               )
 ```
-mean_danceability: 62.94723 median_danceability: 64 min_danceability: 14 max_danceability: 98
+Danceability: Mean: 62.94723 Median: 64 Minimum: 14 Maximum: 98
+
+The mean danceability is 62.9473, the median is 64, the minimum is 14 and the maximum danceability score is 98. This will assist in figuring out which danceability scores are good and bad when using the ANOVA to compute different graphs to prove my null or alternative hypothesis. 
 
 
-This gives the mean, maximum, median and minimum danceability scores for all of the No. 1 songs on the Billboard Hot 100. The mean danceability is 62.9473, the median is 64, the minimum is 14 and the maximum danceability score is 98.
-
+This set of code creates a section in my data set that categorizes each song by decade using the mutate function. This will help me use a category of years of the song's release in my graphs and data. This code also correctly labels each decade from the 1950s to the 2020s. 
 
 ```{r}
 billboard <- billboard |>
-  mutate(decade = floor(year(date_new) / 10) * 10)
-
+  mutate(  decade = floor(year(date_new) / 10) * 10,
+               decade = factor(decade, levels = seq(1950, 2020, by = 10))
+)
 ```
 
-This set of code creates a section in my data set that categorizes each song by decade. This will help me use a category of years of the song's release in my graphs and data. This is a very important set of code for trying to find what decade has the best music. 
+This is imperative to my data because my alternative hypothesis is that the highest rated songs won't be the oldest or the newest, but somewhere in the middle like the 1970s or 1980s. My Null hypothesis is that all decades had an even distribution of top-rated songs. My tests are directly correlated to what decade songs were created in, therefore it is a necessary function to my tests. 
+
+
+
+I will calculate the Z-score for every song in the data set, this gives me a good guideline to see if each of these scores are statistically significant and what can be considered a good or bad overall rating. 
+
+Z-scores between -2 and 2 represent about 95% of the data, while above or below +-2 are considered unusual values. 
 ```{r}
 
 # Calculate z-scores
@@ -75,80 +93,114 @@ billboard <- billboard |>
 # Display the data with z-scores
 billboard |>
   select(song, overall_rating, z_score) |>
-  head(100) 
+  head(1177) 
 ```
+It seems like overall ratings over 8.00 had z-scores of 1 or higher, meaning that the "Good" rated songs were likely to have overall ratings at just below 8.00 or higher. It also seems that overall rathers below 4.00 had z-scores of -1 and lower. Meaning that the songs that had z-scores between -1 and 1 had overall ratings somewhere between 4.00 and 8.00. Calculating the z-scores from every song in the data allows me to accurately figure out which decade has the best overall rating of songs.
 
-This gives the Z-score for every song in the data set, this gives me a good guideline to see if each of these scores are statistically significant and what can be considered a good or bad overall rating. These 100 rows of Z-scores take a random sample of 100 songs and calculates the Z-score for each of those songs, to compare the mean and standard deviations of each of these ratings. 
+This creates a good system for the graph:
 
+z-score > 1 : overall rating > 8 -- "Good"
+z-score > -1 : overall rating < 4 -- "Bad"
+1 > z-score > -1: 8 > overall rating > 4 -- "Normal" 
+
+
+
+Z-scores measure how many standard deviations a data point is from the mean and the highest z-score is 2.129435 and the lowest is -2.8234028, therefore all songs are less than three standard deviations from the mean. 
+
+This will create a visualization of the overall ratings of songs per decade catergorized between the ratings of z-scores. The "Good" rated songs have a z-score above 1, the "Bad" rated songs have a z-score below -1 and the normal rated songs are between -1 and 1 for z-scores. 
 ```{r}
-# Create a clean factor for the plot legend
+# Create clear factors for the plot legend
 billboard <- billboard |>
-  mutate(rating_type = case_when(
-    z_score > 5 ~ "Good",
-    z_score < 5 ~ "Bad",
-    TRUE ~ "Normal"
-  ))
+  mutate(
+    rating_type = case_when(
+      z_score > 1 ~ "Good",
+      z_score < -1 ~ "Bad",
+      TRUE ~ "Normal"
+    ),
+    rating_type = factor(rating_type, levels = c("Good", "Normal", "Bad"))
+  )
 
-ggplot(billboard, aes(x = decade, y = overall_rating, color = rating_type)) +
+ggplot(billboard |> filter(!is.na(decade)),
+       aes(x = decade, y = overall_rating, color = rating_type)) +
   geom_point(size = 2) +
   scale_color_manual(
+    drop = FALSE,
     values = c(
       "Normal" = "gray50",
-      "Good" = "red",
-      "Bad" = "blue"
+      "Good" = "blue",
+      "Bad" = "red"
     )
   ) +
-
- theme_minimal() +
+  theme_minimal() +
   labs(
-    title = "Billboard No. 1 Songs – Good and Bad Rated Songs per decade",
-    subtitle = "Good rated songs = |z-score| > 5",
-    x = "Year",
+    title = "Billboard No. 1 Songs – Good and Bad Rated Songs per Decade",
+    subtitle = "Good rated songs = z-score > 1; Bad rated songs = z-score < -1 ; Normal rated songs are in between -1 and 1",
+    x = "Decade",
     y = "Overall Rating",
     color = "Rating Category"
   ) +
   scale_y_continuous(labels = comma) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
-```
 
-This is a visualization of the overall ratings of songs per decade catergorized between the ratings of above or below 5. This computes the ratings of each of these songs in the sample of 100 songs to show the distribution of lower rated songs and higher rated songs per decade since 1950. 
+```
+This visualization computes the overall ratings calculated in the data between "Good", "normal" and "Bad" songs based on the scale of z-scores and overall ratings that I previously stated. It disagrees with my null hypothesis as the decades with the least amount of "Good" rated songs are in the 1950s and 2020s. That said, the 1970s have the most "Bad" rated songs on the graph with nine, but the 1980s are tied for least "Bad" rated songs with only six with the 2020s and 1950s --- those have more to do with sample size. So, yes in a way, this graph shows that the best songs and least amount of "Bad" songs were created in the 1980s, somewhat agreeing with my alternative hypothesis.
+
+
+On this graph I used the danceability scores as a model to show the difference of those danceability scores through the different decades. 
 ```{r}
-# Create density plot showing overlapping distributions
-ggplot(billboard, aes(x = danceability, fill = decade)) +
-  geom_density(alpha = 1) +
+#create a graph to distribute danceability scores per each decade
+ggplot(billboard |> filter(!is.na(decade)),
+       aes(x = decade, y = danceability)) +
+  geom_col( position = "dodge") +
+
   labs(
-    title = "Danceability Scores per Song",
-    x = "Danceability Scores",
-    y = "Amount of songs",
+    title = "Comparing Danceability Scores for Songs in Each Decade",
+    x = "Decade",
+    y = "Danceability Scores",
     fill = "song"
   ) +
   theme_minimal() +
   scale_fill_brewer(palette = "Set1")
 ```
+As the graph shows, the danceability scores between decades is not evenly distrubuted, therefore disproving my null hypothesis that all decades had an even distribution of top-rated songs. The 1950s clearly have the lowest dance, while the 1990s and 2000s have the highest average dancebaility scores. Therefore it also does not agree with highest rated songs would somewhere in the middle like the 1970s or 1980s. But it does agree with the fact that the highest rated won't be the oldest or the newest and is somewhere in the middle, just not the 1970s or 1980s. The 1970s and 1980s are more similar to the newer decades of the 2010s and 2020s. 
 
-On this graph I used the danceability scores as a model to tell the amount of songs have higher or lower danceability scores as well and the distribution of decade between the danceability scores that were in this data set.
+
+This graph creates blox plots or danceability for every decade in the data, showing the mean, min, and max for danceability in every decade in the data. This graph does a good job in showing the most danceable decades and you can easily compare which decades are more danceable than others.
 ```{r boxplot}
-# Create boxplot for another view
-ggplot(billboard, aes(x = danceability, y = decade, fill = overall_rating)) +
+#Create a bloxplot to calculate the mean, maximum and mininum danceability scores per decade
+ggplot(billboard |> filter(!is.na(decade)),
+       
+       aes(x = decade, y = danceability)) +
   geom_boxplot() +
   labs(
-    title = "Danceability scores per decade",
-    x = "danceability",
-    y = "decade"
+    title = "Mean Danceability Scores Compared by Decade",
+    x = "Decade",
+    y = "Danceability Scores"
   ) +
   theme_minimal() +
   scale_fill_brewer(palette = "Set1")
 ```
+By this graph, it is clear that the mean of danceability was lowest in the 1950s annd 1960s, as well as the 1960s having the lowest minimum and the 1950s having the lowest maximum. The 2000s have the highest mean danceability according to this graph and the 1990s and 2000s have the highest maximum. The 1950s and 2020s have the highest minimum, but that probably has to do with a lack of sample size compared to other decades. 
 
-This graph creates a box plot of the decade where there are the most songs that are danceable. The F value is 145.4. The F-value measures the ratio of between-group danceability scores with a high value, suggesting that there is differences between danceability scores and when the song was released. The p-value is very low, indicating the differences between danceability scores and decades are statistically significant at any reasonable significance level. The three asterisks (***) highlight that this is significant at the 0.001 level. So we can say that with confidence that there are real differences in danceability scores between decades. 
+This graph clearly proves that all decades didn't not have an even distribution of top-rated songs. So the null hypothesis is disproved, but the alternative hypothesis is definitely more complicated. The  highest rated songs weren't be the oldest or the newest, but the 1970s and 1980s didn't have the highest average rated songs, rather the 1990s and 2000s had better means, maximums, and minimums, making newer songs slightly more danceable. 
 
 
+Next, I will create an ANOVA between danceability scores and each decade. This will prove whether or not my data between danceability and decades are significantly significant. This will give me a f-value, which is the ratio of the variability between danceability and decades to prove the variability of the danceability scores between each decade. 
+
+At a 95% confidence level, a Pr(>F) below 0.05 would be statistically significant and would indicate how the mean danceability scores between each decades are statistically significant. 
 ```{r anova-test}
 # Run one-way ANOVA
 anova_result <- aov(danceability ~ decade, data = billboard)
 summary(anova_result)
 ```
+The decades have a significance level of 2e-16. Therefore, there are real differences in the danceability scores throughout each decade because of how much the amount the mean danceability changed between each decade, therefore the results are  statistically significant. At a 95% confidence level, the 2e-16 is less than 0.05 and is statistically significant. The F value is 24.84 and is a lot larger than the Pr(>F) value of 2e-16, which further supports the fact that danceability scores have significantly changed throughout each decade and helps reject my null hypothesis. 
 
+It also in a way supports my alternative hypothesis, in the sense that it proves the opposite of the null hypothesis against the even distribution of top-rated songs, but it doesn't fully support the idea that the highest rated or really most danceable songs aren't the oldest or the newest, but somewhere in the middle like the 1970s or 1980s.
+
+That said when you look at the coefficients per decades, this greater helps prove part of my alternative hypothesis, but not fully or even mostly for that matter. With the 1950s coefficient omitted due to lack of sample size, the 1960s had the lowest coefficient at 2.97901 and consistently increased until the 2000s, where the coefficient decreased in the 2010s and even more into the 2020s. So yes, the highest rated songs according to this coefficient variable were not the oldest or newest. That said, it consistently increased from the 1960s to 2000s. Therefore the 1970s and 1980s did not have the highest rated songs. 
+
+
+Going further in depth in my ANOVA, this will give me an F-statistic and F-values at three different significant levels at 0.05, 0.01 and 0.001 to further prove the significance of my findings. 
 ```{r}
 # Your ANOVA has:
 # df1 (between groups) = 1
@@ -167,57 +219,59 @@ cat("alpha ofα = 0.001:", round(critical_f_001, 3), "\n")
 cat("The F-statistic is: 145.4\n")
 cat("Ratio to most extreme critical value (α=0.001) to the F statistic:", round(145.4/critical_f_001, 1), "x\n")
 ```
-
 alpha of α = 0.05:  3.887 
 alpha of α = 0.01:  6.76 
 alpha ofα = 0.001: 11.145 
 The F-statistic is: 145.4
 
-The F-statistic being 145.5 means that there is a significant difference because all these values are much lower than the F-statistic, therefore the p value all exceed the threshold. So This data between danceability scores and decades where the songs were created are significant through the ANOVA tests through F-statistic and alpha values.n 
+The F-statistic being 145.5 means that there is a significant difference because all these alpha values are much lower than the F-statistic, therefore the p value all exceeded the threshold. With a 95% confidence interval the F-statistic of 145.4 shows that it is strongly significant, greater than the f-value at 0.05 of 3.887, at 0.01 of 6.76 and 0.001 at 11.145. 
+
+This just further proves the original ANOVA analysis, it rejects the null hypothesis about the even distribution of top-rated song in terms of danceability and somewhat supports the alternative hypothesis in the fact that the highest-rated songs were not the oldest or newest and somewhere in between there to better consider that I said it would be somewhere in the middle and yes, technically not the oldest or youngest is in the middle, but it doesn't show that the 1970s or 1980s had the highest rated or in this case most danceable song. 
 
 
-This data looks at the Billboard Hot 100 charts for every song that has been ranked No. 1 on the chart since the charts began in 1958. Over 1177 different songs have been ranked No. 1 on the chart. Starting with Aug. 4, 1958 and most recently Jan. 11, 2025. 
-
-This data logs the amount of weeks each song was No. 1 on the Billboard Hot 100 charts, as well as the amount of nonconsecutive weeks each song was No. 1. Each song also gets three different ratings, that are calculated to create an overall rating. 
-
-The data also labels the Divisiveness score, the label of each song, the parent label of each song, CDR genre and style, discogs style and genre, the artists structure, featured artists and the amount of lead voalists on the song. 
-
-The data gives every possible information about the credits of the song and then it gets into actual statistics based on the song. The data displays the simplified key, beats per minute, happiness that the song gives people, loudness, acousticness, dancebility, energy and if its vocally or base based. 
-The most important columns for my analysis will be those statistics at the end of the data set -- eats per minute, happiness, loudness, acousticness, dancebility and energy. Those statistics will best diversify each song into what my project is trying to research, why are some songs more highly regarded as a No. 1 on the Billboard Hot 100 than others. Those three sets of rating, along with the overall rating calculation will also be important for my analysis. In giving each song a rating it will be able to rank the best of the No. 1 songs on the Billboard Hot 100. 
-
-Also the amount of weeks on the chart could be useful, the greater amount of weeks can correlate to the song being more popular or highly regarded compared to songs that were breifly ranked No. 1. Shaboozy's "A Bar Song (Tipsy)" had the most weeks on the Billboard Hot 100, but only had a 6.33 overall rating and not particlularly high danceability, happiness and energy. "Old Town Road" by Lil Nas X and Billy Ray Cirus was also No. 1 for 19 weeks, but again only had an overall rating of 6.67. "I Will Always Love You" by Whitney Houston was only No. 1 for 14 weeks, but has a 10.0 overall rating, so that song may be a greater factor than the others even if it wasn't No. 1 for as long. Nine songs were rated 10.0, yet were only No. 1 for one week, including great songs like Taylor Swift's "All Too Well (10 Minute Version)", The Temptations' "My Girl" and "Dancing Queen" by ABBA. 
-
-The highest Acousticness was "Love Theme from Romeo and Juliet" by 	Henri Mancini & His Orchestra, but was No. 1 for two weeks and had an overall rating of 5.0. "What a Fool Believes" by The Doobie Brothers was the only song with a Happiness score of 99, but had a 4.00 rating. The highest danceability was "Give It To Me" by Timbaland ft. Nelly Furtado & Justin Timberlake at 98, tied with Ice Ice Baby by Vanila Ice. That said, Ice Ice Baby had an overall rating of 3.33, they just needed to stop, collaborate and listen. 
-
-I also think that release date and when it was on the Billboard Hot 100 will be beneficial to show what era the best songs were released in since 1958. Also, different types of genre would be beneficial to look at to see which songs were rated the best per genre. 
-
-Unfortanetly, Bruce Springsteen never had a No. 1 of his own (I'm a big fan of the boss), but he wrote a No. 1 song. Blinded by the Light by Manfred Mann's Earth Band was written by Springsteen and was No. 1 for one week and had an overall rating of 7.0. 
-
-Taylor Swift had 12 songs that were ranked No. 1 on the Billboard Hot 100, "Anti-Hero" was on the list the longest for eight weeks.
-
-The thing that I would want most in my data would be amount of listeners or CDs sold, some type of metric to track how many people went and bought the song and listened to it -- how much did each song make. That said, with cassetts, vynls, CDs and now streaming, it's hard to quantify those statistics, but I think it'd be beneficial for my data. 
 
 
-Hypothesis: The highest rated songs won't be the oldest or the newest, but somewhere in the middle like the 1970s or 1980s
-
-Hypothesis: The highest rated 100 songs will include multiple songs from the same artist
-
-Hypothesis: The highest happiness songs will be some sort of pop songs with high energy and dancebility. The lowest happiness will have low energy and danceability, but will have higher ratings. 
-
-Hypothesis: The songs with the highest happiness will be songs released after 2000. 
-
-How would I be able to create a model that will use all the statistics in the data to create a different statistic to rank the best No. 1 songs of the Billboard Hot 100?
-
-What type of code would I need to use to create a model to make this data significant?
-
-What type of models will accurately represent the best No. 1 songs on the  Billboard Hot 100?
-
-What songs will be ranked the best after I create a model statistic that will be able to rank the best No. 1 songs using all the data?
-
-How will I separate each song by when it was created, genre, danceability, rating an other statistics used?
+Null Hypothesis: All decades had an even distribution of top-rated songs.
+Alternative Hypothesis: The highest rated and most danceable songs won't be the oldest or the newest, but somewhere in the middle like the 1970s or 1980s
 
 
+My null hypothesis was rejected because all decades did not have an even distribution of top-rated songs. That result is not statistically significant, so in that respect. I was right in saying that my null hypothesis was that all decades had an even distribution of top-rated songs. It was infact highly unlikely to be true given the data.
+
+It was the opposite of my alternative hypothesis which was the highest rated songs won't be the oldest or the newest, but somewhere in the middle like the 1970s or 1980s. But the rejection of my null hypothesis did not prove my alternative hypothesis. 
+
+That said, my alternative hypothesis was somewhat proven, but not fully. All of the test I ran showed that the highest rated and most danceable songs weren't be the oldest or the newest and technically because they weren't in the oldest and newest decade, they were somewhere in the middle. 
+
+That said, when I said "like the 1970s or 1980s" in my alternative hypothesis I was incorrect. The tests I ran showed that the highest rated and most danceable songs were more in the 1990s and the 2000s. 
+
+Using z-scores, I proved that the decades with the least amount of "Good" rated songs are in the 1950s and 2020s which were the youngest and oldest, as well as showed that there was no even distrubution between decades. This data most proved my alternative hypothesis in that given the sample, the 1980s were tied for least "Bad" rated songs and most "Good" rated songs -- albiet with the 1990s. But, the 1970s had the most "Bad" rated songs. That made my claim of saying "like the 1970s or 1980s" inaccurate as the 1990s outscored the 1970s. 
+
+The danceability scores per decade plot further rejected the null hypothesis that all decades had an even distribution of top-rated songs. But again, somewhat supported the alternative hypothesis, just not fully. The 1950s had the lowest danceability score and the 2020s didn't have the best danceability scores. But actually the 2010s and 2020s showed very similar to the 1970s and 1980s and as a result the 1990s and 2000s had the best danceability scores. 
+
+The box plots showed somewhat different results in that 2000s and 2010s had the highest mean danceability scores and the 1990s had the highest maximum. Again, the 1970s and 1980s didn't have the highest average rated songs, rather the 1990s and 2000s had better means, maximums, and minimums, making newer songs slightly more danceable. 
+
+The ANOVA test resulted in similar results, there were real differences in the danceability scores throughout each decade, rejecting the null hypothesis. But again the ANOVA analysis proved once again that the 1990s and 2000s had the most danceable songs. So it wasn't the oldest or newest, but not the 1970s or 1980s. 
+
+So, the 1990s and 2000s were the highest rated and most danceable decades. My null hypothesis was completely rejected, but my alternative hypothesis was not completely proven. 
+
+STORY PITCH:
+
+My story pitch would be about how the 1990s and 2000s were statically proven as the best decades for music. A headline would be something like "The 1990s and 2000s was the Golden Age of Music" and within that I would use specific songs on this Billboard Hot 100 No.1-ranked songs like "The Power of Love" by Céline Dion and "Kiss From a Rose" by Seal and go around public people about what their favorite song from that era is, do they think this data is accurate and what do they think is the Golden Age of Music. I would also ask them what they think is the best song ever to see if they connect with the data. Again this era has songs like "In Da Club" by 50 Cent or "Lose Yourself" by Eminem, so there's many good songs in this. But there's no Taylor Swift No. 1 songs in this era, so looking at certain artists that were most famous or popular may not have mattered, where there the most famous artists in the 1990s or 2000s or was the art of music just the best in that era. The data shows that the art of music just the best in that era. I would also like to get in touch with the top rated song artists of the 1990s and 2000s to see what they think about the era being the golden age of music.
+
+My findings will back up the fact that calling the story "The 1990s and 2000s was the Golden Age of Music" will be accurate no matter what because I already proved that. My main issues are first of all, I don't know who can be considered an "expert" about music, technically everyone who likes music can have a valid opinion and it may be very hard to get comment from top rated song artists of the 1990s and 2000s. Also, the "Golden Age of Music" is a very opinionated narrative, people have different tastes, like different genres and different ideas. So obviously although I had statistical evidence through danceability, overall rating and decades to prove the claim that "The 1990s and 2000s was the Golden Age of Music," I didn't take into account every variable. 
+
+Again, my alternative hypothesis said that the 1970s and 1980s had the best rated and most danceable songs, because I figured before the data that the 1970s and 1980s were in my opinion the greatest era of music. Am I biased toward classic rock and Bruce Springsteen and Billy Joel, so again, my narrative may not be valid. 
+
+
+
+
+
+Part 1: 
+The most important columns for my analysis will be dancebility, overall rating and decade. Those statistics will best diversify each song into what my project is trying to research to show what is the best era of music. The release date and when it was on the Billboard Hot 100 will be beneficial to show what era the best songs were released in since 1958. Also, different types of genre would be beneficial to look at to see which songs were rated the best per genre. 
 
 Part 2:
 
-My biggest errors when transmitting my code was downloading the packages and having to update them. For some reason, I kept having to reload packages or making sure different packages were downloaded. Therefore, it took me some time and frustration to get this part done. I had some issues figuring out how to get my code to work as the original new code you put in the canvas message wasn't wotking, but that was just because I didn't have the correct packages downloaded. 
+My biggest errors when transmitting my code was downloading the packages and having to update them. For some reason, I kept having to reload packages or making sure different packages were downloaded. Therefore, it took me some time and frustration to get this part done. I had some issues figuring out how to get my code to work as the original new code you put in the canvas message wasn't working, but that was just because I didn't have the correct packages downloaded. 
+
+
+Part 3: I think I did a much better job of connecting all of my data with an alternative hypothesis and a null hypothesis. Using help to contextualize the data, in part from help from Professor Wells, I felt a lot more comfortable with the data I was finding and was a lot more thorogh with my analysis because of it. I think I did I better job of understanding what I was proving, in part because I made my null hypothesis and alternative hypothesis much more prevelant and was able to contextualize it with the data. I did most of my coding in part 2, but was able to fix my code to understand the tests I was running, despite early struggles. 
+
